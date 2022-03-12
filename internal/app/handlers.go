@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/joeljunstrom/go-luhn"
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 	"io/ioutil"
@@ -27,6 +28,7 @@ func (a *application) UserRegistration(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", res.Token))
 
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -48,6 +50,7 @@ func (a *application) UserAuthentication(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", res.Token))
 
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
