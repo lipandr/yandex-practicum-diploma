@@ -230,7 +230,7 @@ func (d *DAO) GetOrdersForProcessing() ([]string, error) {
 
 func (d *DAO) UpdateOrderState(status *types.AccrualOrderState) error {
 	_, err := d.dao.Exec(
-		"UPDATE orders SET (status, accrual) = ($1, $2) WHERE order_number = ($3)",
+		"UPDATE orders SET status=$1, accrual=$2 WHERE order_number = ($3)",
 		status.Status, status.Accrual, status.Order,
 	)
 	return err

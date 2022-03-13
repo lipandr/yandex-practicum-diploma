@@ -8,6 +8,7 @@ import (
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 	"golang.org/x/time/rate"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -116,7 +117,7 @@ func (a *accrualProcessor) queueWorker() {
 		orderStatus := a.GetOrderStatus(orderID)
 		if orderStatus != nil {
 			if err := a.dao.UpdateOrderState(orderStatus); err != nil {
-				//log.Println(err)
+				log.Println(err)
 			}
 		}
 	}
