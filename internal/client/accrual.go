@@ -47,7 +47,7 @@ func (a *accrualProcessor) Run() {
 }
 
 func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderState {
-	res, err := http.Get(fmt.Sprintf("http://%s/api/orders/%s", a.address, orderID))
+	res, err := http.Get(fmt.Sprintf("%s/api/orders/%s", a.address, orderID))
 	if err != nil {
 		log.Println(err)
 		return nil

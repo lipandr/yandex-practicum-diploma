@@ -72,7 +72,7 @@ func (a *application) ReceiveOrder(w http.ResponseWriter, r *http.Request) {
 
 	orderNumber := string(value)
 	if ok := luhn.Valid(orderNumber); !ok {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		http.Error(w, errors.New("order number is not valid").Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -102,7 +102,7 @@ func (a *application) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(orders) == 0 {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, errors.New("order list is empty").Error(), http.StatusNoContent)
 		return
 	}
 
@@ -172,7 +172,7 @@ func (a *application) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(wthd) == 0 {
-		http.Error(w, err.Error(), http.StatusNoContent)
+		http.Error(w, errors.New("the list is empty").Error(), http.StatusNoContent)
 		return
 	}
 
