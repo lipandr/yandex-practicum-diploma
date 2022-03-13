@@ -142,10 +142,10 @@ func (d *DAO) GetOrderList(userID int) ([]types.Order, error) {
 	return orders, nil
 }
 
-func (d *DAO) GetTotalWithdrawals(userID int) (int, error) {
-	var w int
+func (d *DAO) GetTotalWithdrawals(userID int) (float64, error) {
+	var w float64
 	err := d.dao.QueryRow(
-		"SELECT SUM(sum) FROM withdraws WHERE user_id = ($1)", userID).
+		"SELECT coalesce(SUM(sum), 0.00) FROM withdraws WHERE user_id = ($1)", userID).
 		Scan(&w)
 	if err != nil {
 		return 0, err
@@ -162,18 +162,16 @@ func (d *DAO) GetAccruals(userID int) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return a, nil
 }
 
-func (d *DAO) NewWithdrawal(userID, sum int, orderNumber string) error {
+func (d *DAO) NewWithdrawal(userID int, sum float64, orderNumber string) error {
 	_, err := d.dao.Exec(
 		"INSERT INTO withdraws (user_id, order_number, sum, processed_at) VALUES ($1, $2, $3, $4);",
 		userID, orderNumber, sum, time.Now())
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 

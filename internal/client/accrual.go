@@ -8,7 +8,6 @@ import (
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 	"golang.org/x/time/rate"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -49,7 +48,7 @@ func (a *accrualProcessor) Run() {
 func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderState {
 	res, err := http.Get(fmt.Sprintf("%s/api/orders/%s", a.address, orderID))
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		return nil
 	}
 	defer func() { _ = res.Body.Close() }()
@@ -57,13 +56,13 @@ func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderSta
 	if res.StatusCode == http.StatusTooManyRequests {
 		resBody, err := io.ReadAll(res.Body)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			return nil
 		}
 		var rl int
 		_, err = fmt.Sscanf(tooManyRequestTemplate, string(resBody), &rl)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			return nil
 		}
 		a.setLimit(rl)
@@ -75,7 +74,7 @@ func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderSta
 
 	var aos types.AccrualOrderState
 	if err := json.NewDecoder(res.Body).Decode(&aos); err != nil {
-		log.Println(err)
+		//log.Println(err)
 		return nil
 	}
 
@@ -110,14 +109,14 @@ func (a *accrualProcessor) queueWorker() {
 		if a.limiter != nil && !a.limiter.Allow() {
 			err := a.limiter.Wait(context.Background())
 			if err != nil {
-				log.Println(err)
+				//log.Println(err)
 				return
 			}
 		}
 		orderStatus := a.GetOrderStatus(orderID)
 		if orderStatus != nil {
 			if err := a.dao.UpdateOrderState(orderStatus); err != nil {
-				log.Println(err)
+				//log.Println(err)
 			}
 		}
 	}

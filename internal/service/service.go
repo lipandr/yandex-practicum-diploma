@@ -10,8 +10,8 @@ type Service interface {
 	UserAuthentication(user *types.UserRequest) (*types.AuthResponse, error)
 	ReceiveOrder(userID int, orderNumber string) error
 	GetOrders(userID int) ([]types.Order, error)
-	GetBalance(userID int) (float64, int, error)
-	WithdrawRequest(userID int, order string, sum int) error
+	GetBalance(userID int) (float64, float64, error)
+	WithdrawRequest(userID int, order string, sum float64) error
 	GetWithdrawals(userID int) ([]types.Withdraw, error)
 	GetUserIDByToken(token string) (int, error)
 }

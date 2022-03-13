@@ -126,17 +126,17 @@ func (a *application) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	res := types.JSONBalance{
 		Current:   crnt,
 		Withdrawn: wthd,
 	}
-
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
 
 // WithdrawRequest Handler запрос на списание начислений

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS withdraws
     id  serial PRIMARY KEY,
     user_id serial REFERENCES users(id),
 	order_number text NOT NULL UNIQUE,
-	sum int,
+	sum real,
 	processed_at timestamp without time zone default now()
 );
 `

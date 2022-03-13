@@ -12,7 +12,6 @@ var (
 	ErrUsersAlreadyExists       = errors.New("user already exists")
 	ErrOrderUploadedByUser      = errors.New("order uploaded user")
 	ErrOrderUploadedByOtherUser = errors.New("order uploaded by other user")
-	ErrOrderIsProcessing        = errors.New("order number accepted for processing")
 	ErrOrderAlreadyWithdrawn    = errors.New("order already withdrawn")
 	ErrInsufficientAccruals     = errors.New("insufficient accruals on the account")
 	ErrOrderNumberInvalid       = errors.New("invalid order number")
@@ -88,10 +87,10 @@ func (nf *NullFloat64) MarshalJSON() ([]byte, error) {
 
 type JSONBalance struct {
 	Current   float64 `json:"current"`
-	Withdrawn int     `json:"withdrawn"`
+	Withdrawn float64 `json:"withdrawn"`
 }
 
 type JSONWithdrawRequest struct {
-	Order string `json:"order"`
-	Sum   int    `json:"sum"`
+	Order string  `json:"order"`
+	Sum   float64 `json:"sum"`
 }

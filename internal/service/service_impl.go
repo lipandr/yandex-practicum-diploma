@@ -2,9 +2,13 @@ package service
 
 import (
 	"crypto/rand"
-	"github.com/lipandr/yandex-practicum-diploma/internal/types"
-	"golang.org/x/crypto/bcrypt"
+	"fmt"
+	"math"
 	"math/big"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 )
 
 func (svc *service) UserRegistration(user *types.UserRequest) (*types.AuthResponse, error) {
@@ -73,7 +77,7 @@ func (svc *service) GetOrders(userID int) ([]types.Order, error) {
 	return orders, nil
 }
 
-func (svc *service) GetBalance(userID int) (float64, int, error) {
+func (svc *service) GetBalance(userID int) (float64, float64, error) {
 	a, err := svc.dao.GetAccruals(userID)
 	if err != nil {
 		return 0, 0, err
@@ -81,12 +85,14 @@ func (svc *service) GetBalance(userID int) (float64, int, error) {
 
 	w, err := svc.dao.GetTotalWithdrawals(userID)
 	if err != nil {
+		fmt.Println(err)
 		return 0, 0, err
 	}
-	return a - float64(w), w, nil
+	b := math.Round((a-w)*100) / 100
+	return b, w, nil
 }
 
-func (svc *service) WithdrawRequest(userID int, orderNumber string, sum int) error {
+func (svc *service) WithdrawRequest(userID int, orderNumber string, sum float64) error {
 	if err := svc.dao.IsOrderWithdrawn(orderNumber); err != nil {
 		return err
 	}
@@ -96,7 +102,7 @@ func (svc *service) WithdrawRequest(userID int, orderNumber string, sum int) err
 		return err
 	}
 
-	if b < float64(sum) {
+	if b < sum {
 		return types.ErrInsufficientAccruals
 	}
 
