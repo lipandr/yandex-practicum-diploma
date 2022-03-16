@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/joeljunstrom/go-luhn"
-	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/joeljunstrom/go-luhn"
+	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 )
 
-// UserRegistration Handler регистрация и аутентификация нового пользователя
+// UserRegistration Handler регистрация и аутентификация нового пользователя.
 func (a *application) UserRegistration(w http.ResponseWriter, r *http.Request) {
 	var user types.UserRequest
 
@@ -18,7 +19,6 @@ func (a *application) UserRegistration(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	res, err := a.svc.UserRegistration(&user)
 	if err != nil {
 		if errors.Is(err, types.ErrUsersAlreadyExists) {
@@ -36,7 +36,7 @@ func (a *application) UserRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UserAuthentication Handler аутентификация пользователя
+// UserAuthentication Handler аутентификация зарегистрированного пользователя.
 func (a *application) UserAuthentication(w http.ResponseWriter, r *http.Request) {
 	var user types.UserRequest
 
@@ -44,7 +44,6 @@ func (a *application) UserAuthentication(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	res, err := a.svc.UserAuthentication(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -58,7 +57,7 @@ func (a *application) UserAuthentication(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// ReceiveOrder Handler принятие в обработку нового заказа
+// ReceiveOrder Handler принятие в обработку нового заказа.
 func (a *application) ReceiveOrder(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(types.UserID).(int)
 
@@ -69,7 +68,6 @@ func (a *application) ReceiveOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	orderNumber := string(value)
 	if ok := luhn.Valid(orderNumber); !ok {
 		http.Error(w, errors.New("order number is not valid").Error(), http.StatusUnprocessableEntity)
@@ -87,11 +85,10 @@ func (a *application) ReceiveOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(status)
 		return
 	}
-
 	w.WriteHeader(http.StatusAccepted)
 }
 
-// GetOrders Handler получение списка загруженных заказов для начисления
+// GetOrders Handler получение списка загруженных заказов для начисления.
 func (a *application) GetOrders(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(types.UserID).(int)
 
@@ -100,12 +97,10 @@ func (a *application) GetOrders(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	if len(orders) == 0 {
 		http.Error(w, errors.New("order list is empty").Error(), http.StatusNoContent)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -113,10 +108,9 @@ func (a *application) GetOrders(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
 
-// GetBalance Handler получение текущего баланса пользователя
+// GetBalance Handler получение текущего баланса пользователя.
 func (a *application) GetBalance(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(types.UserID).(int)
 
@@ -125,7 +119,6 @@ func (a *application) GetBalance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	res := types.JSONBalance{
 		Current:   crnt,
 		Withdrawn: wthd,
@@ -139,7 +132,7 @@ func (a *application) GetBalance(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// WithdrawRequest Handler запрос на списание начислений
+// WithdrawRequest Handler запрос на списание начислений.
 func (a *application) WithdrawRequest(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(types.UserID).(int)
 
@@ -162,7 +155,7 @@ func (a *application) WithdrawRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetWithdrawals Handler получение списка списаний начислений
+// GetWithdrawals Handler получение списка списаний начислений.
 func (a *application) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(types.UserID).(int)
 
@@ -175,7 +168,6 @@ func (a *application) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errors.New("the list is empty").Error(), http.StatusNoContent)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

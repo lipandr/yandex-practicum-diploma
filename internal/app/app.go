@@ -1,13 +1,14 @@
 package app
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/lipandr/yandex-practicum-diploma/internal/config"
 	"github.com/lipandr/yandex-practicum-diploma/internal/service"
-	"net/http"
 )
 
-// Application интерфейс приложения
+// Application интерфейс приложения.
 type Application interface {
 	Run() error
 	UserRegistration(w http.ResponseWriter, r *http.Request)
@@ -24,7 +25,7 @@ type application struct {
 	svc service.Service
 }
 
-// NewApp метод конструктор приложения
+// NewApp метод конструктор приложения.
 func NewApp(cfg config.Config, svc service.Service) Application {
 	return &application{
 		cfg: cfg,
@@ -32,7 +33,7 @@ func NewApp(cfg config.Config, svc service.Service) Application {
 	}
 }
 
-// Run запуск сервера приложения
+// Run метод запуска сервера приложения.
 func (a *application) Run() error {
 	r := mux.NewRouter()
 

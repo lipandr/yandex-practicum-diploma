@@ -8,6 +8,7 @@ import (
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 )
 
+// NewUser метод DAO добавления нового пользователя.
 func (d *DAO) NewUser(userID, encPass string) (int, error) {
 	var id int
 	err := d.dao.QueryRow(
@@ -16,10 +17,10 @@ func (d *DAO) NewUser(userID, encPass string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return id, nil
 }
 
+// GetUserByLogin метод DAO получения записи о пользователе.
 func (d *DAO) GetUserByLogin(login string) (*types.TUser, error) {
 	var u types.TUser
 	err := d.dao.QueryRow(
@@ -27,21 +28,10 @@ func (d *DAO) GetUserByLogin(login string) (*types.TUser, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &u, nil
 }
 
-func (d *DAO) GetToken(token string) (int, error) {
-	var userID int
-	err := d.dao.QueryRow(
-		"SELECT user_id FROM tokens WHERE token = ($1)", token).Scan(&userID)
-	if err != nil {
-		return 0, err
-	}
-
-	return userID, nil
-}
-
+// SaveToken метод DAO сохранения токена выданного пользователю.
 func (d *DAO) SaveToken(userID int, token string) error {
 	_, err := d.dao.Exec(
 		"INSERT INTO tokens (user_id, token) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET token = ($2)",
@@ -49,10 +39,21 @@ func (d *DAO) SaveToken(userID int, token string) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
+// GetToken метод DAO получения сохраненного токена пользователя.
+func (d *DAO) GetToken(token string) (int, error) {
+	var userID int
+	err := d.dao.QueryRow(
+		"SELECT user_id FROM tokens WHERE token = ($1)", token).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
+// NewOrder метод DAO сохранения нового заказа для расчета начислений.
 func (d *DAO) NewOrder(userID int, orderNumber string) error {
 	_, err := d.dao.Exec(
 		"INSERT INTO orders (order_number, user_id, status) "+
@@ -61,13 +62,12 @@ func (d *DAO) NewOrder(userID int, orderNumber string) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
+// IsOrderExists метод DAO проверки сохраненного заказа.
 func (d *DAO) IsOrderExists(userID int, orderNumber string) error {
 	var o types.Order
-
 	err := d.dao.QueryRow(
 		"SELECT order_number, user_id FROM orders WHERE order_number = ($1)", orderNumber).
 		Scan(&o.OrderNumber, &o.UserID)
@@ -75,10 +75,8 @@ func (d *DAO) IsOrderExists(userID int, orderNumber string) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
-
 		return err
 	}
-
 	if o.OrderNumber == orderNumber {
 		if o.UserID == userID {
 			return types.ErrOrderUploadedByUser
@@ -86,13 +84,12 @@ func (d *DAO) IsOrderExists(userID int, orderNumber string) error {
 			return types.ErrOrderUploadedByOtherUser
 		}
 	}
-
 	return nil
 }
 
+// IsOrderWithdrawn метод DAO проверки осуществленных списаний по номеру заказа.
 func (d *DAO) IsOrderWithdrawn(orderNumber string) error {
 	var o string
-
 	err := d.dao.QueryRow(
 		"SELECT order_number FROM withdraws WHERE order_number = ($1)", orderNumber).
 		Scan(&o)
@@ -102,46 +99,40 @@ func (d *DAO) IsOrderWithdrawn(orderNumber string) error {
 		}
 		return err
 	}
-
 	if o == orderNumber {
 		return types.ErrOrderAlreadyWithdrawn
 	}
-
 	return nil
 }
 
+// GetOrderList метод DAO получения списка заказов пользователя.
 func (d *DAO) GetOrderList(userID int) ([]types.Order, error) {
 	var orders []types.Order
-
 	rows, err := d.dao.Query(
 		"SELECT order_number, status, accrual, uploaded_at from orders where user_id = ($1) ORDER BY uploaded_at ;", userID)
 	if err != nil {
 		return nil, err
 	}
-
 	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var o types.Order
 		var t time.Time
-
 		err = rows.Scan(&o.OrderNumber, &o.Status, &o.Accrual, &t)
 		if err != nil {
 			return nil, err
 		}
-
 		o.UploadedAt = t.Local().Format(time.RFC3339)
 		orders = append(orders, o)
 	}
-
 	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
-
 	return orders, nil
 }
 
+// GetTotalWithdrawals метод DAO получения суммы списаний, осуществленных пользователем.
 func (d *DAO) GetTotalWithdrawals(userID int) (float64, error) {
 	var w float64
 	err := d.dao.QueryRow(
@@ -150,10 +141,10 @@ func (d *DAO) GetTotalWithdrawals(userID int) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return w, nil
 }
 
+// GetAccruals метод DAO получения суммы начислений пользователя.
 func (d *DAO) GetAccruals(userID int) (float64, error) {
 	var a float64
 	err := d.dao.QueryRow(
@@ -165,6 +156,7 @@ func (d *DAO) GetAccruals(userID int) (float64, error) {
 	return a, nil
 }
 
+// NewWithdrawal метод DAO добавления нового списания пользователя.
 func (d *DAO) NewWithdrawal(userID int, sum float64, orderNumber string) error {
 	_, err := d.dao.Exec(
 		"INSERT INTO withdraws (user_id, order_number, sum, processed_at) VALUES ($1, $2, $3, $4);",
@@ -175,42 +167,38 @@ func (d *DAO) NewWithdrawal(userID int, sum float64, orderNumber string) error {
 	return nil
 }
 
+// GetWithdrawalsList метод DAO получения списка списаний пользователя.
 func (d *DAO) GetWithdrawalsList(userID int) ([]types.Withdraw, error) {
 	var wthd []types.Withdraw
-
 	rows, err := d.dao.Query(
 		"SELECT order_number, sum, processed_at from withdraws where user_id = ($1) ORDER BY processed_at ;", userID)
 	if err != nil {
 		return nil, err
 	}
-
 	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var w types.Withdraw
 		var t time.Time
-
 		err = rows.Scan(&w.OrderNumber, &w.Sum, &t)
 		if err != nil {
 			return nil, err
 		}
-
 		w.ProcessedAt = t.Format(time.RFC3339)
 		wthd = append(wthd, w)
 	}
-
 	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
-
 	return wthd, nil
 }
 
+// GetOrdersForProcessing метод DAO получения списка заказов для расчета начислений.
 func (d *DAO) GetOrdersForProcessing() ([]string, error) {
 	var orders []string
 	rows, err := d.dao.Query(
-		"SELECT order_number FROM orders WHERE status IN ($1, $2)", "NEW", "PROCESSING",
+		"SELECT order_number FROM orders WHERE status IN ($1, $2) FOR UPDATE LIMIT 10", "NEW", "PROCESSING",
 	)
 	if err != nil {
 		return nil, err
@@ -228,6 +216,7 @@ func (d *DAO) GetOrdersForProcessing() ([]string, error) {
 	return orders, err
 }
 
+// UpdateOrderState метод DAO обновления статуса заказа по результатам расчета начислений.
 func (d *DAO) UpdateOrderState(status *types.AccrualOrderState) error {
 	_, err := d.dao.Exec(
 		"UPDATE orders SET status=$1, accrual=$2 WHERE order_number = ($3)",

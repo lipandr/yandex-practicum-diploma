@@ -2,13 +2,15 @@ package main
 
 import (
 	"flag"
+	"github.com/lipandr/yandex-practicum-diploma/internal/types"
+	"log"
+
 	"github.com/caarlos0/env/v6"
 	"github.com/lipandr/yandex-practicum-diploma/internal/app"
 	"github.com/lipandr/yandex-practicum-diploma/internal/client"
 	"github.com/lipandr/yandex-practicum-diploma/internal/config"
 	"github.com/lipandr/yandex-practicum-diploma/internal/dao"
 	"github.com/lipandr/yandex-practicum-diploma/internal/service"
-	"log"
 )
 
 func main() {
@@ -29,7 +31,7 @@ func main() {
 		log.Fatal("Can't start application:", err)
 	}
 
-	cl := client.NewAccrualProcessor(db, cfg.AccrualSystemAddress, 10)
+	cl := client.NewAccrualProcessor(db, cfg.AccrualSystemAddress, types.WorkersPoolSize)
 	cl.Run()
 
 	svc, err := service.NewService(db)

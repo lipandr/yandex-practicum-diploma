@@ -5,6 +5,7 @@ import (
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 )
 
+// Service интерфейс сервисного слоя приложения.
 type Service interface {
 	UserRegistration(user *types.UserRequest) (*types.AuthResponse, error)
 	UserAuthentication(user *types.UserRequest) (*types.AuthResponse, error)
@@ -20,6 +21,7 @@ type service struct {
 	dao *dao.DAO
 }
 
+// NewService метод-конструктор Service.
 func NewService(dao *dao.DAO) (*service, error) {
 	return &service{
 		dao: dao,

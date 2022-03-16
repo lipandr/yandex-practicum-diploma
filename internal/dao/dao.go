@@ -10,7 +10,7 @@ type DAO struct {
 	dao *sql.DB
 }
 
-// NewDAO открытие соединения с БД
+// NewDAO открытие соединения с БД и создание таблиц.
 func NewDAO(dataSourceName string) (*DAO, error) {
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
@@ -25,13 +25,11 @@ func NewDAO(dataSourceName string) (*DAO, error) {
 		WithdrawsTable,
 		UserTokens,
 	}
-
 	for _, table := range tables {
 		if _, err = db.Exec(table); err != nil {
 			return nil, err
 		}
 	}
-
 	return &DAO{
 		dao: db,
 	}, nil

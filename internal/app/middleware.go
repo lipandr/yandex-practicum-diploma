@@ -5,12 +5,13 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	"github.com/lipandr/yandex-practicum-diploma/internal/service"
-	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/lipandr/yandex-practicum-diploma/internal/service"
+	"github.com/lipandr/yandex-practicum-diploma/internal/types"
 )
 
 const authorizationScheme = "Bearer"
@@ -29,7 +30,7 @@ func (w gzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-// GzipMiddleware Middleware метод обрабатывающий сжатие gzip
+// GzipMiddleware middleware метод обрабатывающий сжатие gzip.
 func GzipMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -48,7 +49,6 @@ func GzipMiddleware(next http.Handler) http.Handler {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			r.Body = ioutil.NopCloser(bytes.NewReader(body))
 			r.ContentLength = int64(len(body))
 		}
@@ -56,7 +56,6 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
 			if _, err := io.WriteString(w, err.Error()); err != nil {
@@ -73,7 +72,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// AuthMiddleware Middleware метода аутентификации пользователя
+// AuthMiddleware middleware метода аутентификации/авторизации пользователя.
 func AuthMiddleware(svc service.Service) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -81,27 +80,24 @@ func AuthMiddleware(svc service.Service) func(handler http.Handler) http.Handler
 				next.ServeHTTP(w, r)
 				return
 			}
-
 			token, err := getTokenFromAuthHeader(r.Header.Get("Authorization"))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 			id, err := svc.GetUserIDByToken(token)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
-
 			ctx := context.WithValue(r.Context(), types.UserID, id)
 			req := r.WithContext(ctx)
-
 			next.ServeHTTP(w, req)
 		})
 	}
 }
 
+// Метод AuthMiddleware получения токена из заголовка запроса.
 func getTokenFromAuthHeader(headerVal string) (string, error) {
 	var token string
 
@@ -112,6 +108,5 @@ func getTokenFromAuthHeader(headerVal string) (string, error) {
 		}
 		token = headerParts[1]
 	}
-
 	return token, nil
 }

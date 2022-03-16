@@ -1,6 +1,7 @@
 package dao
 
 const (
+	// UsersTable таблица для хранения зарегистрированных пользователей.
 	UsersTable = `
 CREATE TABLE IF NOT EXISTS users
 (
@@ -9,6 +10,17 @@ CREATE TABLE IF NOT EXISTS users
 	encrypted_password text
 );
 `
+	// UserTokens таблица для хранения токенов авторизации выданных пользователям.
+	UserTokens = `
+CREATE TABLE IF NOT EXISTS tokens
+(
+	id serial PRIMARY KEY,
+	user_id serial REFERENCES users(id) UNIQUE,
+	token text,
+	created_at timestamp without time zone default now()
+);
+`
+	// OrdersTable таблица хранения номеров заказов для расчета начислений.
 	OrdersTable = `
 CREATE TABLE IF NOT EXISTS orders
 (
@@ -20,6 +32,7 @@ CREATE TABLE IF NOT EXISTS orders
 	uploaded_at timestamp without time zone default now()
 );
 `
+	// WithdrawsTable таблица хранения списаний пользователей.
 	WithdrawsTable = `
 CREATE TABLE IF NOT EXISTS withdraws
 (
@@ -28,15 +41,6 @@ CREATE TABLE IF NOT EXISTS withdraws
 	order_number text NOT NULL UNIQUE,
 	sum real,
 	processed_at timestamp without time zone default now()
-);
-`
-	UserTokens = `
-CREATE TABLE IF NOT EXISTS tokens
-(
-	id serial PRIMARY KEY,
-	user_id serial REFERENCES users(id) UNIQUE,
-	token text,
-	created_at timestamp without time zone default now()
 );
 `
 )

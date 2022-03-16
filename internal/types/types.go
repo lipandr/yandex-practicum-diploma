@@ -7,6 +7,11 @@ import (
 	"reflect"
 )
 
+const (
+	UserID          UserSession = "userID"
+	WorkersPoolSize             = 10
+)
+
 var (
 	ErrUsersNotAuthenticated    = errors.New("user is not authenticated")
 	ErrUsersAlreadyExists       = errors.New("user already exists")
@@ -16,8 +21,6 @@ var (
 	ErrInsufficientAccruals     = errors.New("insufficient accruals on the account")
 	ErrOrderNumberInvalid       = errors.New("invalid order number")
 )
-
-const UserID UserSession = "userID"
 
 type UserSession string
 
@@ -36,12 +39,6 @@ type AuthResponse struct {
 	Token string `json:"token"`
 }
 
-type AccrualOrderState struct {
-	Order   string  `json:"order"`
-	Status  string  `json:"status"`
-	Accrual float64 `json:"accrual"`
-}
-
 type Order struct {
 	ID          int          `json:"-" db:"id"`
 	OrderNumber string       `json:"number" db:"order_number"`
@@ -58,6 +55,22 @@ type Withdraw struct {
 	ProcessedAt string  `json:"processed_at" db:"processed_at"`
 }
 
+type JSONBalance struct {
+	Current   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
+}
+
+type JSONWithdrawRequest struct {
+	Order string  `json:"order"`
+	Sum   float64 `json:"sum"`
+}
+
+type AccrualOrderState struct {
+	Order   string  `json:"order"`
+	Status  string  `json:"status"`
+	Accrual float64 `json:"accrual"`
+}
+
 // NullFloat64 is an alias for sql.NullInt64 data type
 type NullFloat64 sql.NullFloat64
 
@@ -67,13 +80,11 @@ func (nf *NullFloat64) Scan(value interface{}) error {
 	if err := f.Scan(value); err != nil {
 		return err
 	}
-
 	if reflect.TypeOf(value) == nil {
 		*nf = NullFloat64{f.Float64, false}
 	} else {
 		*nf = NullFloat64{f.Float64, true}
 	}
-
 	return nil
 }
 
@@ -83,14 +94,4 @@ func (nf *NullFloat64) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 	return json.Marshal(nf.Float64)
-}
-
-type JSONBalance struct {
-	Current   float64 `json:"current"`
-	Withdrawn float64 `json:"withdrawn"`
-}
-
-type JSONWithdrawRequest struct {
-	Order string  `json:"order"`
-	Sum   float64 `json:"sum"`
 }
