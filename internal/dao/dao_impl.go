@@ -198,7 +198,7 @@ func (d *DAO) GetWithdrawalsList(userID int) ([]types.Withdraw, error) {
 func (d *DAO) GetOrdersForProcessing() ([]string, error) {
 	var orders []string
 	rows, err := d.dao.Query(
-		"SELECT order_number FROM orders WHERE status IN ($1, $2) FOR UPDATE LIMIT 10", "NEW", "PROCESSING",
+		"SELECT order_number FROM orders WHERE status IN ($1, $2) LIMIT 10", "NEW", "PROCESSING",
 	)
 	if err != nil {
 		return nil, err

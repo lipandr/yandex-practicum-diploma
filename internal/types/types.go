@@ -8,8 +8,8 @@ import (
 )
 
 const (
+	WorkersPoolSize int         = 10
 	UserID          UserSession = "userID"
-	WorkersPoolSize             = 10
 )
 
 var (
