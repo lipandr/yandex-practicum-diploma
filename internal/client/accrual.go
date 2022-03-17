@@ -68,7 +68,7 @@ func (a *accrualProcessor) Run() {
 }
 
 func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderState {
-	res, err := http.Get(fmt.Sprintf("%s/api/orders/%s", a.address, orderID))
+	res, err := http.Get(fmt.Sprintf("http://%s/api/orders/%s", a.address, orderID))
 	if err != nil {
 		log.Println("request error", err)
 		return nil
@@ -97,6 +97,8 @@ func (a *accrualProcessor) GetOrderStatus(orderID string) *types.AccrualOrderSta
 		log.Println(err)
 		return nil
 	}
+	// TODO remove
+	log.Println("AccProc - get order status:", &aos)
 	return &aos
 }
 

@@ -3,6 +3,7 @@ package dao
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/lipandr/yandex-practicum-diploma/internal/types"
@@ -218,6 +219,8 @@ func (d *DAO) GetOrdersForProcessing(wps int) ([]string, error) {
 
 // UpdateOrderState метод DAO обновления статуса заказа по результатам расчета начислений.
 func (d *DAO) UpdateOrderState(status *types.AccrualOrderState) error {
+	// TODO rem
+	log.Println("DAO update order status", status)
 	_, err := d.dao.Exec(
 		"UPDATE orders SET status=$1, accrual=$2 WHERE order_number = ($3)",
 		status.Status, status.Accrual, status.Order,
