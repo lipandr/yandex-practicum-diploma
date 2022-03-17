@@ -55,7 +55,7 @@ func (a *accrualProcessor) Run() {
 		for {
 			orderList, err := a.dao.GetOrdersForProcessing(types.WorkersPoolSize)
 			if err != nil || len(orderList) == 0 {
-				time.Sleep(time.Minute)
+				time.Sleep(5 * time.Second)
 				continue
 			}
 			wg.Add(len(orderList))
