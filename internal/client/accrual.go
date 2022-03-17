@@ -53,7 +53,7 @@ var wg sync.WaitGroup
 func (a *accrualProcessor) Run() {
 	go func() {
 		for {
-			orderList, err := a.dao.GetOrdersForProcessing()
+			orderList, err := a.dao.GetOrdersForProcessing(types.WorkersPoolSize)
 			if err != nil || len(orderList) == 0 {
 				time.Sleep(time.Minute)
 				continue

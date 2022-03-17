@@ -195,10 +195,10 @@ func (d *DAO) GetWithdrawalsList(userID int) ([]types.Withdraw, error) {
 }
 
 // GetOrdersForProcessing метод DAO получения списка заказов для расчета начислений.
-func (d *DAO) GetOrdersForProcessing() ([]string, error) {
+func (d *DAO) GetOrdersForProcessing(wps int) ([]string, error) {
 	var orders []string
 	rows, err := d.dao.Query(
-		"SELECT order_number FROM orders WHERE status IN ($1, $2) LIMIT 10", "NEW", "PROCESSING",
+		"SELECT order_number FROM orders WHERE status IN ($1, $2) ORDER BY uploaded_at LIMIT $1", "NEW", "PROCESSING", wps,
 	)
 	if err != nil {
 		return nil, err
