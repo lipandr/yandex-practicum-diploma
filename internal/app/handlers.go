@@ -69,11 +69,10 @@ func (a *application) ReceiveOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	orderNumber := string(value)
-	if ok := luhn.Valid(orderNumber); !ok {
-		http.Error(w, errors.New("order number is not valid").Error(), http.StatusUnprocessableEntity)
+	if err := ValidateOrderNumber(orderNumber); err != nil {
+		http.Error(w, types.ErrOrderNumberInvalid.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-
 	if err := a.svc.ReceiveOrder(userID, orderNumber); err != nil {
 		status := http.StatusInternalServerError
 		if errors.Is(err, types.ErrOrderUploadedByUser) {
@@ -141,7 +140,7 @@ func (a *application) WithdrawRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if ok := luhn.Valid(req.Order); !ok {
+	if err := ValidateOrderNumber(req.Order); err != nil {
 		http.Error(w, types.ErrOrderNumberInvalid.Error(), http.StatusUnprocessableEntity)
 		return
 	}
@@ -175,4 +174,14 @@ func (a *application) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func ValidateOrderNumber(orderID string) error {
+	if ok := luhn.Valid(orderID); !ok {
+		return types.ErrOrderNumberInvalid
+	}
+	if len(orderID) < 5 || len(orderID) > 15 {
+		return types.ErrOrderNumberInvalid
+	}
+	return nil
 }
