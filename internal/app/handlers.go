@@ -176,6 +176,7 @@ func (a *application) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ValidateOrderNumber метод-helper для валидации номеров заказов по алгоритму Луна.
 func ValidateOrderNumber(orderID string) error {
 	if ok := luhn.Valid(orderID); !ok {
 		return types.ErrOrderNumberInvalid

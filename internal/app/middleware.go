@@ -97,7 +97,7 @@ func AuthMiddleware(svc service.Service) func(handler http.Handler) http.Handler
 	}
 }
 
-// Метод AuthMiddleware получения токена из заголовка запроса.
+// Метод-helper AuthMiddleware получения токена из заголовка запроса.
 func getTokenFromAuthHeader(headerVal string) (string, error) {
 	var token string
 
